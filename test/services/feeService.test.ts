@@ -5,7 +5,7 @@ import { Credentials, TestHelper } from "./TestHelper";
 
 describe("fee service", () => {
   const client = NotbankClient.Factory.createRestClient("stgapi.notbank.exchange");
-  let credentials: Credentials = undefined
+  let credentials: Credentials
 
   before(async () => {
     credentials = TestHelper.getCredentials()

@@ -1,12 +1,20 @@
 import assert from "assert";
 import "mocha";
 
-import { readFileSync } from 'fs';
 import { NotbankClient } from "../../lib/services/notbankClient";
 import { TestHelper } from "./TestHelper";
 
 describe("wallet service", () => {
-  const client = NotbankClient.Factory.createRestClient("stgapi.notbank.exchange");
+  const client = NotbankClient.Factory.createRestClient("stgapi.notbank.exchange",
+    request => {
+      console.log("**REQUEST**")
+      console.log(request)
+    },
+    response => {
+      console.log("**RESPONSE**")
+      console.log(response.data)
+    }
+  );
   var credentials = TestHelper.getCredentials();
 
   before(async () => {
@@ -59,16 +67,17 @@ describe("wallet service", () => {
     const coBankAccountId = 'cb54ca55-10ef-4584-9f87-e5f3b1ecf7b6'
     const arBankAccoutnId = '4d677d9c-81e1-45d2-9903-43fd599b6599'
     it("should work", async () => {
-      const account = await service.getClientBankAccount({ bankAccountId: arBankAccoutnId });
+      const account = await service.getClientBankAccount({ bankAccountId: arBankAccoutnId, user_id: bankAccountId });
       console.log("account:", account)
       assert.ok(account)
     });
   });
 
-  describe("getClientBankAccounts", () => {
+  describe.only("getClientBankAccounts", () => {
     it("should work", async () => {
-      const account = await service.getClientBankAccounts({});
-      console.log(account)
+      const account = await service.getClientBankAccounts({
+        user_id: 'ac77a800-7914-4d04-ba3b-8f66c5b4968d'
+      });
       assert.ok(account)
     });
   });
@@ -146,6 +155,7 @@ describe("wallet service", () => {
         async () => {
           const response = await service.deleteWhitelistedAddress({
             account_id: 235,
+            user_id:"123123",
             whitelistedAddressId: "6a36bdf4-cf21-42ce-9945-6008b0485969",
             otp: "849886"
           });
@@ -161,7 +171,8 @@ describe("wallet service", () => {
         const response = await service.confirmWhitelistedAddress({
           account_id: 235,
           whitelistedAddressId: "3ea209e0-2511-4121-b502-efbd37ae1cf6",
-          sms_code: "7489181"
+          user_id: "123123",
+          sms_code: "7489181",
         });
         console.log(response);
       });
@@ -197,6 +208,7 @@ describe("wallet service", () => {
       await assert.doesNotReject(async () => {
         await service.getOneStepWithdraw({
           account_id: 235,
+          user_id:"22222222222"
         });
       });
     });

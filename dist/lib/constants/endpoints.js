@@ -86,7 +86,7 @@ export var Endpoint;
     Endpoint["GET_NETWORKS_TEMPLATES"] = "wallet/crypto/withdrawal/templates";
     Endpoint["DEPOSIT_ADDRESS"] = "wallet/crypto";
     Endpoint["WHITELIST_ADDRESSES"] = "wallet/crypto/whitelist-addresses";
-    Endpoint["UPDATE_ONE_STEP_WITHDRAW"] = "wallet/crypto/whitelist-addresses/one-step/status";
+    Endpoint["ONE_STEP_WITHDRAW"] = "wallet/crypto/whitelist-addresses/one-step/status";
     Endpoint["CREATE_CRYPTO_WITHDRAW"] = "wallet/crypto/withdrawal";
     Endpoint["FIAT_DEPOSIT"] = "wallet/fiat/deposit";
     Endpoint["GET_OWNERS_FIAT_WITHDRAW"] = "wallet/fiat/withdrawal/owners";

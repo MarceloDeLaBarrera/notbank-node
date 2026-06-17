@@ -75,7 +75,7 @@ export declare enum Endpoint {
     GET_NETWORKS_TEMPLATES = "wallet/crypto/withdrawal/templates",
     DEPOSIT_ADDRESS = "wallet/crypto",
     WHITELIST_ADDRESSES = "wallet/crypto/whitelist-addresses",
-    UPDATE_ONE_STEP_WITHDRAW = "wallet/crypto/whitelist-addresses/one-step/status",
+    ONE_STEP_WITHDRAW = "wallet/crypto/whitelist-addresses/one-step/status",
     CREATE_CRYPTO_WITHDRAW = "wallet/crypto/withdrawal",
     FIAT_DEPOSIT = "wallet/fiat/deposit",
     GET_OWNERS_FIAT_WITHDRAW = "wallet/fiat/withdrawal/owners",

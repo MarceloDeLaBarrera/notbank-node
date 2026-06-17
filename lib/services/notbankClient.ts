@@ -19,8 +19,8 @@ import { UserService } from "./userService";
 import { VerificationService } from "./verificationService";
 import { WalletService } from "./walletService";
 import { WebsocketServiceFactory } from "./websocketServiceFactory";
-
-const DEFAULT_DOMAIN = "api.notbank.exchange";
+import { RequestData } from "../core/http/jsonRequester";
+import { AxiosResponse } from "axios";
 
 export class NotbankClient {
   connection: ServiceConnection
@@ -103,8 +103,8 @@ export class NotbankClient {
 
 
   static Factory = class Factory {
-    static createRestClient(domain?: string) {
-      var factory = new HttpServiceFactory(domain)
+    static createRestClient(domain?: string, peekRequest?: (data: RequestData<any>) => void, peekResponse?: (response: AxiosResponse<any>) => void) {
+      var factory = new HttpServiceFactory(domain, peekRequest, peekResponse)
       return new NotbankClient({
         connection: factory.getConnection(),
         accountService: factory.newAccountService(),

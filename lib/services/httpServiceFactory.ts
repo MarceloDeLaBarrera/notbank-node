@@ -16,15 +16,17 @@ import { VerificationService } from "./verificationService";
 import { RegisterService } from "./registerService";
 import { YieldService } from "./yieldService";
 import { SubAccountService } from "./subAccountService";
+import { RequestData } from "../core/http/jsonRequester";
+import { AxiosResponse } from "axios";
 
 const DEFAULT_DOMAIN = "api.notbank.exchange";
 
 export class HttpServiceFactory {
   #httpConnection: HttpConnection;
 
-  constructor(domain?: string) {
+  constructor(domain?: string, peekRequest?: (data: RequestData<any>) => void, peekResponse?: (response: AxiosResponse<any>) => void) {
     const finalDomain = domain || DEFAULT_DOMAIN;
-    this.#httpConnection = new HttpConnection(finalDomain);
+    this.#httpConnection = new HttpConnection(finalDomain, peekRequest || (() => { }), peekResponse || (() => { }));
   }
 
   authenticateUser(params: {

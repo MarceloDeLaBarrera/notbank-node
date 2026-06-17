@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import { Endpoint } from "../../constants/endpoints";
 import {
   AuthenticateUserRequest,
@@ -10,14 +11,19 @@ import { SubscriptionHandler } from "../websocket/subscriptionHandler";
 import { ApResponseHandler } from "./apResponseHandler";
 import { FormDataBuilder } from "./formDataBuilder";
 import { FormDataRequester } from "./formDataRequester";
-import { JsonRequester } from "./jsonRequester";
+import { JsonRequester, RequestData } from "./jsonRequester";
 import { NbResponseHandler } from "./nbResponseHandler";
 export class HttpConnection implements ServiceConnection {
   #host: string;
   #sessionToken?: string;
+  #peekRequest: (data: RequestData<any>) => void;
+  #peekResponse: (response: AxiosResponse<any>) => void;
 
-  constructor(domain: string) {
+  constructor(domain: string, peekRequest: (data: RequestData<any>) => void, peekResponse: (response: AxiosResponse<any>) => void) {
     this.#host = "https://" + domain;
+    this.#peekRequest = peekRequest
+    this.#peekResponse = peekResponse
+
   }
 
   async nbRequest<T1, T2>(
@@ -28,8 +34,10 @@ export class HttpConnection implements ServiceConnection {
   ): Promise<T2> {
     const url = this.getNbUrl(endpoint);
     const headers = this.getHeaders();
-    var response = await JsonRequester.request({ url, requestType, params: message, extraHeaders: headers });
-    
+    const requestData = { url, requestType, params: message, headers: headers };
+    this.#peekRequest(requestData)
+    var response = await JsonRequester.request(requestData);
+    this.#peekResponse(response)
     return await NbResponseHandler.handle<T2>(response, paged);
 
   }
@@ -43,7 +51,9 @@ export class HttpConnection implements ServiceConnection {
     const url = this.getNbUrl(endpoint);
     const formData = FormDataBuilder.build({ fields, files, message: message || {} })
     const headers = this.getHeaders();
-    const response = await FormDataRequester.post({ url, formData, extraHeaders: headers });
+    this.#peekRequest({ url, requestType: RequestType.POST, params: formData, headers: headers })
+    const response = await FormDataRequester.post({ url, formData, headers: headers });
+    this.#peekResponse(response)
     return await NbResponseHandler.handle<T2>(response, false);
   }
 
@@ -55,12 +65,10 @@ export class HttpConnection implements ServiceConnection {
   ): Promise<T2> {
     const url = this.getApUrl(endpoint);
     const headers = { ...extraHeaders, ...this.getHeaders() }
-    const response = await JsonRequester.request({
-      url,
-      requestType,
-      params: message,
-      extraHeaders: headers
-    });
+    const requestData = { url, requestType, params: message, headers: headers }
+    this.#peekRequest(requestData)
+    const response = await JsonRequester.request(requestData);
+    this.#peekResponse(response)
     return await ApResponseHandler.handle<T2>(response);
   }
 

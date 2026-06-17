@@ -1,7 +1,6 @@
 import { NotbankError } from "../models/index.js";
 import { HttpServiceFactory } from "./httpServiceFactory.js";
 import { WebsocketServiceFactory } from "./websocketServiceFactory.js";
-const DEFAULT_DOMAIN = "api.notbank.exchange";
 export class NotbankClient {
     constructor(params) {
         this.connection = params.connection;
@@ -76,8 +75,8 @@ export class NotbankClient {
     }
 }
 NotbankClient.Factory = class Factory {
-    static createRestClient(domain) {
-        var factory = new HttpServiceFactory(domain);
+    static createRestClient(domain, peekRequest, peekResponse) {
+        var factory = new HttpServiceFactory(domain, peekRequest, peekResponse);
         return new NotbankClient({
             connection: factory.getConnection(),
             accountService: factory.newAccountService(),

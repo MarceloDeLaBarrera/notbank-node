@@ -42,7 +42,7 @@ export class WalletService {
      * https://apidoc.notbank.exchange/#getclientbankaccount
      */
     getClientBankAccount(request) {
-        return this.connection.nbRequest(Endpoint.BANK_ACCOUNTS + "/" + request.bankAccountId, RequestType.GET);
+        return this.connection.nbRequest(Endpoint.BANK_ACCOUNTS + "/" + request.bankAccountId, RequestType.GET, request.user_id !== undefined ? { user_id: request.user_id } : null);
     }
     /**
      * https://apidoc.notbank.exchange/#getclientbankaccounts
@@ -54,7 +54,7 @@ export class WalletService {
      * https://apidoc.notbank.exchange/#deleteclientbankaccount
      */
     deleteClientBankAccount(request) {
-        return this.connection.nbRequest(Endpoint.BANK_ACCOUNTS + "/" + request.bankAccountId, RequestType.DELETE);
+        return this.connection.nbRequest(Endpoint.BANK_ACCOUNTS + "/" + request.bankAccountId, RequestType.DELETE, request.user_id !== undefined ? { user_id: request.user_id } : null);
     }
     /**
      * https://apidoc.notbank.exchange/#getnetworkstemplates
@@ -90,25 +90,22 @@ export class WalletService {
      * https://apidoc.notbank.exchange/#confirmwhitelistedaddress
      */
     confirmWhitelistedAddress(request) {
-        return this.connection.nbRequest(Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId + "/verification", RequestType.POST, { sms_code: request.sms_code, account_id: request.account_id });
+        return this.connection.nbRequest(Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId + "/verification", RequestType.POST, Object.assign({ sms_code: request.sms_code, account_id: request.account_id }, (request.user_id !== undefined && { user_id: request.user_id })));
     }
     resendVerificationCodeWhitelistedAddress(request) {
-        return this.connection.nbRequest(Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId + "/verification", RequestType.GET, { account_id: request.account_id });
+        return this.connection.nbRequest(Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId + "/verification", RequestType.GET, Object.assign({ account_id: request.account_id }, (request.user_id !== undefined && { user_id: request.user_id })));
     }
     /**
      * https://apidoc.notbank.exchange/#deletewhitelistedaddress
      */
     deleteWhitelistedAddress(request) {
-        return this.connection.nbRequest(Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId, RequestType.DELETE, {
-            account_id: request.account_id,
-            otp: request.otp
-        });
+        return this.connection.nbRequest(Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId, RequestType.DELETE, Object.assign({ account_id: request.account_id, otp: request.otp }, (request.user_id !== undefined && { user_id: request.user_id })));
     }
     /**
      * https://apidoc.notbank.exchange/#updateonestepwithdraw
      */
     updateOneStepWithdraw(request) {
-        return this.connection.nbRequest(Endpoint.UPDATE_ONE_STEP_WITHDRAW, RequestType.POST, request);
+        return this.connection.nbRequest(Endpoint.ONE_STEP_WITHDRAW, RequestType.POST, request);
     }
     /**
      * https://apidoc.notbank.exchange/#createcryptowithdraw
@@ -144,7 +141,7 @@ export class WalletService {
    * https://apidoc.notbank.exchange/#confirmfiatwithdraw
    */
     confirmFiatWithdraw(request) {
-        return this.connection.nbRequest(Endpoint.FIAT_WITHDRAW + "/" + request.withdrawal_id, RequestType.POST, { attempt_code: request.attempt_code });
+        return this.connection.nbRequest(Endpoint.FIAT_WITHDRAW + "/" + request.withdrawal_id, RequestType.POST, Object.assign({ attempt_code: request.attempt_code }, (request.user_id !== undefined && { user_id: request.user_id })));
     }
     /**
      * https://apidoc.notbank.exchange/#transferfunds
@@ -163,7 +160,7 @@ export class WalletService {
      */
     getOneStepWithdraw(request) {
         return __awaiter(this, void 0, void 0, function* () {
-            const result = yield __classPrivateFieldGet(this, _WalletService_instances, "m", _WalletService_nbPagedRequest).call(this, Endpoint.GET_TRANSACTIONS, RequestType.GET, request);
+            const result = yield __classPrivateFieldGet(this, _WalletService_instances, "m", _WalletService_nbPagedRequest).call(this, Endpoint.ONE_STEP_WITHDRAW, RequestType.GET, request);
             return result.enabled;
         });
     }

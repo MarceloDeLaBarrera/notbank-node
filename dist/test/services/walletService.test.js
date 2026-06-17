@@ -12,7 +12,13 @@ import "mocha";
 import { NotbankClient } from "../../lib/services/notbankClient.js";
 import { TestHelper } from "./TestHelper.js";
 describe("wallet service", () => {
-    const client = NotbankClient.Factory.createRestClient("stgapi.notbank.exchange");
+    const client = NotbankClient.Factory.createRestClient("stgapi.notbank.exchange", request => {
+        console.log("**REQUEST**");
+        console.log(request);
+    }, response => {
+        console.log("**RESPONSE**");
+        console.log(response.data);
+    });
     var credentials = TestHelper.getCredentials();
     before(() => __awaiter(void 0, void 0, void 0, function* () {
         yield client.authenticateUser(credentials);
@@ -59,15 +65,16 @@ describe("wallet service", () => {
         const coBankAccountId = 'cb54ca55-10ef-4584-9f87-e5f3b1ecf7b6';
         const arBankAccoutnId = '4d677d9c-81e1-45d2-9903-43fd599b6599';
         it("should work", () => __awaiter(void 0, void 0, void 0, function* () {
-            const account = yield service.getClientBankAccount({ bankAccountId: arBankAccoutnId });
+            const account = yield service.getClientBankAccount({ bankAccountId: arBankAccoutnId, user_id: bankAccountId });
             console.log("account:", account);
             assert.ok(account);
         }));
     });
-    describe("getClientBankAccounts", () => {
+    describe.only("getClientBankAccounts", () => {
         it("should work", () => __awaiter(void 0, void 0, void 0, function* () {
-            const account = yield service.getClientBankAccounts({});
-            console.log(account);
+            const account = yield service.getClientBankAccounts({
+                user_id: 'ac77a800-7914-4d04-ba3b-8f66c5b4968d'
+            });
             assert.ok(account);
         }));
     });
@@ -136,6 +143,7 @@ describe("wallet service", () => {
             yield assert.doesNotReject(() => __awaiter(void 0, void 0, void 0, function* () {
                 const response = yield service.deleteWhitelistedAddress({
                     account_id: 235,
+                    user_id: "123123",
                     whitelistedAddressId: "6a36bdf4-cf21-42ce-9945-6008b0485969",
                     otp: "849886"
                 });
@@ -149,7 +157,8 @@ describe("wallet service", () => {
                 const response = yield service.confirmWhitelistedAddress({
                     account_id: 235,
                     whitelistedAddressId: "3ea209e0-2511-4121-b502-efbd37ae1cf6",
-                    sms_code: "7489181"
+                    user_id: "123123",
+                    sms_code: "7489181",
                 });
                 console.log(response);
             }));
@@ -182,6 +191,7 @@ describe("wallet service", () => {
             yield assert.doesNotReject(() => __awaiter(void 0, void 0, void 0, function* () {
                 yield service.getOneStepWithdraw({
                     account_id: 235,
+                    user_id: "22222222222"
                 });
             }));
         }));
