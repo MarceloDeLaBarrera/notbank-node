@@ -4068,7 +4068,7 @@ var NotbankSdk = (() => {
     static post(config) {
       const requestData = {
         method: "POST" /* POST */,
-        headers: _FormDataRequester.getHeaders(config.extraHeaders)
+        headers: _FormDataRequester.getHeaders(config.headers)
       };
       return axios_default.post(config.url, config.formData, requestData);
     }
@@ -4115,7 +4115,7 @@ var NotbankSdk = (() => {
       var data = isPostOrDeleteRequest ? config.params : null;
       var requestConfig = {
         method: config.requestType,
-        headers: _JsonRequester.getHeaders(config.extraHeaders, isPostOrDeleteRequest),
+        headers: _JsonRequester.getHeaders(config.headers, isPostOrDeleteRequest),
         validateStatus: (status) => true
       };
       return Requester.getFunction(config.requestType)(url, data, requestConfig);
@@ -4155,18 +4155,25 @@ var NotbankSdk = (() => {
   };
 
   // lib/core/http/httpConnection.ts
-  var _host, _sessionToken;
+  var _host, _sessionToken, _peekRequest, _peekResponse;
   var HttpConnection = class {
-    constructor(domain) {
+    constructor(domain, peekRequest, peekResponse) {
       __privateAdd(this, _host);
       __privateAdd(this, _sessionToken);
+      __privateAdd(this, _peekRequest);
+      __privateAdd(this, _peekResponse);
       __privateSet(this, _host, "https://" + domain);
+      __privateSet(this, _peekRequest, peekRequest);
+      __privateSet(this, _peekResponse, peekResponse);
     }
     nbRequest(endpoint, requestType, message, paged = false) {
       return __async(this, null, function* () {
         const url = this.getNbUrl(endpoint);
         const headers = this.getHeaders();
-        var response = yield JsonRequester.request({ url, requestType, params: message, extraHeaders: headers });
+        const requestData = { url, requestType, params: message, headers };
+        __privateGet(this, _peekRequest).call(this, requestData);
+        var response = yield JsonRequester.request(requestData);
+        __privateGet(this, _peekResponse).call(this, response);
         return yield NbResponseHandler.handle(response, paged);
       });
     }
@@ -4175,7 +4182,9 @@ var NotbankSdk = (() => {
         const url = this.getNbUrl(endpoint);
         const formData = FormDataBuilder.build({ fields, files, message: message || {} });
         const headers = this.getHeaders();
-        const response = yield FormDataRequester.post({ url, formData, extraHeaders: headers });
+        __privateGet(this, _peekRequest).call(this, { url, requestType: "POST" /* POST */, params: formData, headers });
+        const response = yield FormDataRequester.post({ url, formData, headers });
+        __privateGet(this, _peekResponse).call(this, response);
         return yield NbResponseHandler.handle(response, false);
       });
     }
@@ -4183,12 +4192,10 @@ var NotbankSdk = (() => {
       return __async(this, null, function* () {
         const url = this.getApUrl(endpoint);
         const headers = __spreadValues(__spreadValues({}, extraHeaders), this.getHeaders());
-        const response = yield JsonRequester.request({
-          url,
-          requestType,
-          params: message,
-          extraHeaders: headers
-        });
+        const requestData = { url, requestType, params: message, headers };
+        __privateGet(this, _peekRequest).call(this, requestData);
+        const response = yield JsonRequester.request(requestData);
+        __privateGet(this, _peekResponse).call(this, response);
         return yield ApResponseHandler.handle(response);
       });
     }
@@ -4239,6 +4246,8 @@ var NotbankSdk = (() => {
   };
   _host = new WeakMap();
   _sessionToken = new WeakMap();
+  _peekRequest = new WeakMap();
+  _peekResponse = new WeakMap();
 
   // lib/utils/completeParams.ts
   function completeParams(params, omsId) {
@@ -5199,7 +5208,8 @@ var NotbankSdk = (() => {
     getClientBankAccount(request) {
       return this.connection.nbRequest(
         "bank-accounts" /* BANK_ACCOUNTS */ + "/" + request.bankAccountId,
-        "GET" /* GET */
+        "GET" /* GET */,
+        request.user_id !== void 0 ? { user_id: request.user_id } : null
       );
     }
     /**
@@ -5214,7 +5224,8 @@ var NotbankSdk = (() => {
     deleteClientBankAccount(request) {
       return this.connection.nbRequest(
         "bank-accounts" /* BANK_ACCOUNTS */ + "/" + request.bankAccountId,
-        "DELETE" /* DELETE */
+        "DELETE" /* DELETE */,
+        request.user_id !== void 0 ? { user_id: request.user_id } : null
       );
     }
     /**
@@ -5274,14 +5285,19 @@ var NotbankSdk = (() => {
       return this.connection.nbRequest(
         "wallet/crypto/whitelist-addresses" /* WHITELIST_ADDRESSES */ + "/" + request.whitelistedAddressId + "/verification",
         "POST" /* POST */,
-        { sms_code: request.sms_code, account_id: request.account_id }
+        __spreadValues({
+          sms_code: request.sms_code,
+          account_id: request.account_id
+        }, request.user_id !== void 0 && { user_id: request.user_id })
       );
     }
     resendVerificationCodeWhitelistedAddress(request) {
       return this.connection.nbRequest(
         "wallet/crypto/whitelist-addresses" /* WHITELIST_ADDRESSES */ + "/" + request.whitelistedAddressId + "/verification",
         "GET" /* GET */,
-        { account_id: request.account_id }
+        __spreadValues({
+          account_id: request.account_id
+        }, request.user_id !== void 0 && { user_id: request.user_id })
       );
     }
     /**
@@ -5291,10 +5307,10 @@ var NotbankSdk = (() => {
       return this.connection.nbRequest(
         "wallet/crypto/whitelist-addresses" /* WHITELIST_ADDRESSES */ + "/" + request.whitelistedAddressId,
         "DELETE" /* DELETE */,
-        {
+        __spreadValues({
           account_id: request.account_id,
           otp: request.otp
-        }
+        }, request.user_id !== void 0 && { user_id: request.user_id })
       );
     }
     /**
@@ -5302,7 +5318,7 @@ var NotbankSdk = (() => {
      */
     updateOneStepWithdraw(request) {
       return this.connection.nbRequest(
-        "wallet/crypto/whitelist-addresses/one-step/status" /* UPDATE_ONE_STEP_WITHDRAW */,
+        "wallet/crypto/whitelist-addresses/one-step/status" /* ONE_STEP_WITHDRAW */,
         "POST" /* POST */,
         request
       );
@@ -5360,7 +5376,9 @@ var NotbankSdk = (() => {
       return this.connection.nbRequest(
         "wallet/fiat/withdrawal" /* FIAT_WITHDRAW */ + "/" + request.withdrawal_id,
         "POST" /* POST */,
-        { attempt_code: request.attempt_code }
+        __spreadValues({
+          attempt_code: request.attempt_code
+        }, request.user_id !== void 0 && { user_id: request.user_id })
       );
     }
     /**
@@ -5384,7 +5402,7 @@ var NotbankSdk = (() => {
      */
     getOneStepWithdraw(request) {
       return __async(this, null, function* () {
-        const result = yield __privateMethod(this, _WalletService_instances, nbPagedRequest_fn).call(this, "wallet/transactions" /* GET_TRANSACTIONS */, "GET" /* GET */, request);
+        const result = yield __privateMethod(this, _WalletService_instances, nbPagedRequest_fn).call(this, "wallet/crypto/whitelist-addresses/one-step/status" /* ONE_STEP_WITHDRAW */, "GET" /* GET */, request);
         return result.enabled;
       });
     }
@@ -5660,10 +5678,12 @@ var NotbankSdk = (() => {
   var DEFAULT_DOMAIN = "api.notbank.exchange";
   var _httpConnection;
   var HttpServiceFactory = class {
-    constructor(domain) {
+    constructor(domain, peekRequest, peekResponse) {
       __privateAdd(this, _httpConnection);
       const finalDomain = domain || DEFAULT_DOMAIN;
-      __privateSet(this, _httpConnection, new HttpConnection(finalDomain));
+      __privateSet(this, _httpConnection, new HttpConnection(finalDomain, peekRequest || (() => {
+      }), peekResponse || (() => {
+      })));
     }
     authenticateUser(params) {
       var nonce = getNonce();
@@ -6758,8 +6778,8 @@ var NotbankSdk = (() => {
     }
   };
   _NotbankClient.Factory = class Factory {
-    static createRestClient(domain) {
-      var factory2 = new HttpServiceFactory(domain);
+    static createRestClient(domain, peekRequest, peekResponse) {
+      var factory2 = new HttpServiceFactory(domain, peekRequest, peekResponse);
       return new _NotbankClient({
         connection: factory2.getConnection(),
         accountService: factory2.newAccountService(),
