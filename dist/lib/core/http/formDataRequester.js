@@ -4,7 +4,7 @@ export class FormDataRequester {
     static post(config) {
         const requestData = {
             method: RequestType.POST,
-            headers: FormDataRequester.getHeaders(config.extraHeaders),
+            headers: FormDataRequester.getHeaders(config.headers),
         };
         return axios.post(config.url, config.formData, requestData);
     }

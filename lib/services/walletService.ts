@@ -88,6 +88,7 @@ export class WalletService {
     return this.connection.nbRequest(
       Endpoint.BANK_ACCOUNTS + "/" + request.bankAccountId,
       RequestType.GET,
+      request.user_id !== undefined ? { user_id: request.user_id } : null
     );
   }
 
@@ -109,7 +110,8 @@ export class WalletService {
   deleteClientBankAccount(request: DeleteClientBankAccountRequest): Promise<void> {
     return this.connection.nbRequest(
       Endpoint.BANK_ACCOUNTS + "/" + request.bankAccountId,
-      RequestType.DELETE
+      RequestType.DELETE,
+      request.user_id !== undefined ? { user_id: request.user_id } : null
     );
   }
 
@@ -174,7 +176,10 @@ export class WalletService {
     return this.connection.nbRequest(
       Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId + "/verification",
       RequestType.POST,
-      { sms_code: request.sms_code, account_id: request.account_id }
+      {
+        sms_code: request.sms_code, account_id: request.account_id,
+        ...(request.user_id !== undefined && { user_id: request.user_id })
+      }
     );
   }
 
@@ -182,7 +187,10 @@ export class WalletService {
     return this.connection.nbRequest(
       Endpoint.WHITELIST_ADDRESSES + "/" + request.whitelistedAddressId + "/verification",
       RequestType.GET,
-      { account_id: request.account_id }
+      {
+        account_id: request.account_id,
+        ...(request.user_id !== undefined && { user_id: request.user_id })
+      }
     );
   }
 
@@ -195,7 +203,8 @@ export class WalletService {
       RequestType.DELETE,
       {
         account_id: request.account_id,
-        otp: request.otp
+        otp: request.otp,
+        ...(request.user_id !== undefined && { user_id: request.user_id })
       }
     );
   }
@@ -205,7 +214,7 @@ export class WalletService {
    */
   updateOneStepWithdraw(request: UpdateOneStepWithdrawRequest): Promise<void> {
     return this.connection.nbRequest(
-      Endpoint.UPDATE_ONE_STEP_WITHDRAW,
+      Endpoint.ONE_STEP_WITHDRAW,
       RequestType.POST,
       request
     );
@@ -265,7 +274,10 @@ export class WalletService {
     return this.connection.nbRequest(
       Endpoint.FIAT_WITHDRAW + "/" + request.withdrawal_id,
       RequestType.POST,
-      { attempt_code: request.attempt_code }
+      {
+        attempt_code: request.attempt_code,
+        ...(request.user_id !== undefined && { user_id: request.user_id })
+      }
     );
   }
 
@@ -296,7 +308,7 @@ export class WalletService {
    */
   async getOneStepWithdraw(request: GetOneStepWithdrawRequest): Promise<Boolean> {
     const result = await this.#nbPagedRequest<GetOneStepWithdrawRequest, { enabled: boolean }>(
-      Endpoint.GET_TRANSACTIONS,
+      Endpoint.ONE_STEP_WITHDRAW,
       RequestType.GET,
       request
     );

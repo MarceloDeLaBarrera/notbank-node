@@ -12,7 +12,7 @@ import { NotbankClient } from "../../lib/services/notbankClient.js";
 import { TestHelper } from "./TestHelper.js";
 describe("fee service", () => {
     const client = NotbankClient.Factory.createRestClient("stgapi.notbank.exchange");
-    let credentials = undefined;
+    let credentials;
     before(() => __awaiter(void 0, void 0, void 0, function* () {
         credentials = TestHelper.getCredentials();
         yield client.authenticateUser(credentials);

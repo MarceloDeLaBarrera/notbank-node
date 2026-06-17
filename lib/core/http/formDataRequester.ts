@@ -7,14 +7,14 @@ import { Requester } from "./Requester";
 export interface FormDataRequest {
   url: string,
   formData: FormData
-  extraHeaders?: any
+  headers?: any
 }
 
 export class FormDataRequester {
   public static post<T1>(config: FormDataRequest): Promise<AxiosResponse<any>> {
     const requestData = {
       method: RequestType.POST,
-      headers: FormDataRequester.getHeaders(config.extraHeaders),
+      headers: FormDataRequester.getHeaders(config.headers),
     };
     return axios.post(config.url,config.formData, requestData);
   }

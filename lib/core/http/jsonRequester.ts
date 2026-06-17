@@ -1,14 +1,17 @@
 import { AxiosResponse } from "axios";
 import { RequestType } from "../serviceClient";
 import { Requester } from "./Requester";
-export class JsonRequester {
 
-  static request<T1>(config: {
-    url: string,
-    requestType: RequestType,
-    params?: T1;
-    extraHeaders?: any
-  }
+export type RequestData<T1> = {
+  url: string;
+  requestType: RequestType;
+  params?: T1;
+  headers?: any;
+};
+
+export class JsonRequester {
+  static request<T1>(
+    config: RequestData<T1>
   ): Promise<AxiosResponse<any>> {
     const isPostOrDeleteRequest = [
       RequestType.POST, RequestType.DELETE].includes(config.requestType)
@@ -20,7 +23,7 @@ export class JsonRequester {
       null;
     var requestConfig: any = {
       method: config.requestType,
-      headers: JsonRequester.getHeaders(config.extraHeaders, isPostOrDeleteRequest),
+      headers: JsonRequester.getHeaders(config.headers, isPostOrDeleteRequest),
       validateStatus: status => true,
     }
     return Requester.getFunction(config.requestType)(url, data, requestConfig);

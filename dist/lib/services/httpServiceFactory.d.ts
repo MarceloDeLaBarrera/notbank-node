@@ -14,9 +14,11 @@ import { VerificationService } from "./verificationService.js";
 import { RegisterService } from "./registerService.js";
 import { YieldService } from "./yieldService.js";
 import { SubAccountService } from "./subAccountService.js";
+import { RequestData } from "../core/http/jsonRequester.js";
+import { AxiosResponse } from "axios";
 export declare class HttpServiceFactory {
     #private;
-    constructor(domain?: string);
+    constructor(domain?: string, peekRequest?: (data: RequestData<any>) => void, peekResponse?: (response: AxiosResponse<any>) => void);
     authenticateUser(params: {
         ApiPublicKey: string;
         ApiSecretKey: string;

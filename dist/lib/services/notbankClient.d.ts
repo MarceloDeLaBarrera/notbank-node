@@ -16,6 +16,8 @@ import { TradingService } from "./tradingService.js";
 import { UserService } from "./userService.js";
 import { VerificationService } from "./verificationService.js";
 import { WalletService } from "./walletService.js";
+import { RequestData } from "../core/http/jsonRequester.js";
+import { AxiosResponse } from "axios";
 export declare class NotbankClient {
     connection: ServiceConnection;
     accountService: AccountService;
@@ -71,7 +73,7 @@ export declare class NotbankClient {
     });
     static Factory: {
         new (): {};
-        createRestClient(domain?: string): NotbankClient;
+        createRestClient(domain?: string, peekRequest?: (data: RequestData<any>) => void, peekResponse?: (response: AxiosResponse<any>) => void): NotbankClient;
         createWebsocketClient(configuration?: WebsocketConnectionConfiguration): NotbankClient;
     };
     getAccountService(): AccountService;

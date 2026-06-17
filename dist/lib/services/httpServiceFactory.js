@@ -29,10 +29,10 @@ import { YieldService } from "./yieldService.js";
 import { SubAccountService } from "./subAccountService.js";
 const DEFAULT_DOMAIN = "api.notbank.exchange";
 export class HttpServiceFactory {
-    constructor(domain) {
+    constructor(domain, peekRequest, peekResponse) {
         _HttpServiceFactory_httpConnection.set(this, void 0);
         const finalDomain = domain || DEFAULT_DOMAIN;
-        __classPrivateFieldSet(this, _HttpServiceFactory_httpConnection, new HttpConnection(finalDomain), "f");
+        __classPrivateFieldSet(this, _HttpServiceFactory_httpConnection, new HttpConnection(finalDomain, peekRequest || (() => { }), peekResponse || (() => { })), "f");
     }
     authenticateUser(params) {
         var nonce = getNonce();

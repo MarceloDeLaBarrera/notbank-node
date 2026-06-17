@@ -13,7 +13,7 @@ export class JsonRequester {
             null;
         var requestConfig = {
             method: config.requestType,
-            headers: JsonRequester.getHeaders(config.extraHeaders, isPostOrDeleteRequest),
+            headers: JsonRequester.getHeaders(config.headers, isPostOrDeleteRequest),
             validateStatus: status => true,
         };
         return Requester.getFunction(config.requestType)(url, data, requestConfig);
